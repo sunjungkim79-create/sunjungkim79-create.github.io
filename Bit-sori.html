@@ -6,9 +6,9 @@
     <title>김애란 『비행운』 문장 필사 노트</title>
     <style>
         :root {
-            --bg-color: #f4f1ea; /* 빛바랜 종이 느낌 */
+            --bg-color: #f4f1ea; 
             --text-color: #2c3e50;
-            --accent-color: #8e44ad; /* 비행운의 보랏빛 여운 */
+            --accent-color: #4a69bd; 
             --border-color: #d1ccc0;
         }
         body {
@@ -21,36 +21,64 @@
         }
         header {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 40px;
         }
-        h1 { font-size: 2.2em; letter-spacing: 2px; margin-bottom: 10px; }
+        h1 { font-size: 2.2em; letter-spacing: 2px; margin-bottom: 10px; color: var(--accent-color); }
         .subtitle { color: #7f8c8d; font-size: 1em; }
 
+        .user-info-section {
+            text-align: center;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            margin: 0 auto 50px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+        .user-info-section input {
+            padding: 10px;
+            font-size: 1.1em;
+            width: 80%;
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            text-align: center;
+            outline: none;
+            font-family: inherit;
+        }
+
         .transcription-section {
-            max-width: 1200px;
-            margin: 0 auto 80px;
+            max-width: 1000px;
+            margin: 0 auto;
         }
         .row {
             display: flex;
-            gap: 50px;
-            margin-bottom: 40px;
+            gap: 40px;
+            margin-bottom: 60px;
             align-items: stretch;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            position: relative;
         }
         .original-box, .writing-box {
             flex: 1;
-            padding: 30px;
-            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
         }
         .original-box {
-            background: white;
-            box-shadow: 2px 2px 10px rgba(0,0,0,0.05);
-            border-top: 3px solid var(--accent-color);
-            position: relative;
+            border-right: 1px dashed var(--border-color);
+            padding-right: 30px;
+        }
+        .writing-box {
+            padding-left: 10px;
         }
         .original-text {
             font-size: 1.05em;
             word-break: keep-all;
-            white-space: pre-wrap; /* 줄바꿈 유지 */
+            white-space: pre-wrap; 
+            flex-grow: 1;
         }
         .source-info {
             display: block;
@@ -64,124 +92,140 @@
         textarea {
             width: 100%;
             height: 100%;
-            min-height: 200px;
-            background: transparent;
+            min-height: 150px;
+            background: #faf9f6;
             border: 1px solid var(--border-color);
-            padding: 20px;
+            border-radius: 8px;
+            padding: 15px;
             font-family: inherit;
             font-size: 1.05em;
             line-height: 1.8;
-            resize: none;
+            resize: vertical;
             outline: none;
             transition: all 0.3s;
+            box-sizing: border-box;
+            flex-grow: 1;
         }
         textarea:focus {
-            background: rgba(255,255,255,0.8);
+            background: white;
             border-color: var(--accent-color);
-            box-shadow: inset 0 0 5px rgba(142, 68, 173, 0.1);
+            box-shadow: 0 0 5px rgba(74, 105, 189, 0.2);
         }
 
-        /* 반응형 설정 */
-        @media (max-width: 900px) {
+        .save-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-family: inherit;
+            align-self: flex-end;
+            transition: background 0.2s;
+        }
+        .save-btn:hover { background-color: #3b5598; }
+
+        @media (max-width: 768px) {
             .row { flex-direction: column; gap: 20px; }
-            .original-box, .writing-box { padding: 20px; }
+            .original-box { border-right: none; border-bottom: 1px dashed var(--border-color); padding-right: 0; padding-bottom: 20px; }
+            .writing-box { padding-left: 0; }
         }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>비행운 (飛行雲)</h1>
-    <div class="subtitle">어느 나라에서 불어와 어떤 세계로 건너갈지 모르는 바람의 기록</div>
+    <h1>빗소리와 함께하는 필사</h1>
+    <div class="subtitle">마음을 울린 문장들을 기록으로 남겨보세요.</div>
 </header>
+
+<div class="user-info-section">
+    <label for="userName" style="display: block; margin-bottom: 10px; font-weight: bold;">필사 노트의 주인을 알려주세요</label>
+    <input type="text" id="userName" placeholder="예: 김선정" required>
+</div>
 
 <div class="transcription-section">
 
     <div class="row">
         <div class="original-box">
-            <div class="original-text">아무도 내가 죽어가고 있다는 걸 모른다는 고립감. 그리고 그걸 누구에게도 전하지 못한다는 갑갑함이 밀려왔다. 수면 위로 아른아른 조용하게 빛나는 여름 햇빛이 보였다. 손 내밀면 닿을 것 같은 거리에서 유혹하듯 화사하게 출렁이던 차안(此岸)의 얇고 환한 막. 나는 그 빛을 잡고 싶었다. 하지만 손에 걸리는 거라곤 쥐자마자 이내 부서지는 몇 움큼의 강물이 전부였다.</div>
+            <div class="original-text" id="source1">아무도 내가 죽어가고 있다는 걸 모른다는 고립감. 그리고 그걸 누구에게도 전하지 못한다는 갑갑함이 밀려왔다. 수면 위로 아른아른 조용하게 빛나는 여름 햇빛이 보였다...</div>
             <span class="source-info">「너의 여름은 어떠니」 p.41</span>
         </div>
         <div class="writing-box">
-            <textarea placeholder="문장을 옮겨 적으며 머물러보세요..."></textarea>
+            <textarea id="content1" placeholder="문장을 천천히 옮겨 적어보세요..."></textarea>
+            <button class="save-btn" onclick="saveData(1)">이 문장 저장하기</button>
         </div>
     </div>
 
     <div class="row">
         <div class="original-box">
-            <div class="original-text">A구역은 세상만사를 삼킨 심연처럼 시커먼 아가리를 벌린 채 시치미를 떼고 있었다. 그곳은 한없이 깊고 어두워 보였다. 방 안으로 검은 나방 한 마리가 후드득 들어왔다. 나는 멍하니 입을 벌린 채 서 있었다.</div>
+            <div class="original-text" id="source2">A구역은 세상만사를 삼킨 심연처럼 시커먼 아가리를 벌린 채 시치미를 떼고 있었다. 그곳은 한없이 깊고 어두워 보였다. 방 안으로 검은 나방 한 마리가 후드득 들어왔다.</div>
             <span class="source-info">「벌레들」 p.75</span>
         </div>
         <div class="writing-box">
-            <textarea placeholder="문장을 옮겨 적으며 머물러보세요..."></textarea>
+            <textarea id="content2" placeholder="문장을 천천히 옮겨 적어보세요..."></textarea>
+            <button class="save-btn" onclick="saveData(2)">이 문장 저장하기</button>
         </div>
     </div>
 
     <div class="row">
         <div class="original-box">
-            <div class="original-text">뿌리가 있는 것은 의당 그래야 한다는 듯, 순응과 저항 사이의 미묘한 춤을 췄다.</div>
-            <span class="source-info">「물속 골리앗」 p.86</span>
+            <div class="original-text" id="source3">“힘든 건 불행이 아니라…… 행복을 기다리는 게 지겨운 거였어.”</div>
+            <span class="source-info">「호텔 니약 따」 pp.276~277</span>
         </div>
         <div class="writing-box">
-            <textarea placeholder="문장을 옮겨 적으며 머물러보세요..."></textarea>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="original-box">
-            <div class="original-text">얼마 뒤 녀석이 지나간 자리에 안도의 긴 한숨 자국이 드러났다. 사람들이 비행운이라 부르는 구름이었다.</div>
-            <span class="source-info">「하루의 축」 p.176</span>
-        </div>
-        <div class="writing-box">
-            <textarea placeholder="문장을 옮겨 적으며 머물러보세요..."></textarea>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="original-box">
-            <div class="original-text">변기에 앉아 화장지를 끊을 때마다, 부드러운 두부 조직이 식도를 건드릴 때마다 전에 없던 설렘과 만족이 찾아왔다. 그리고 만약 그런 ‘기분’도 구매할 수 있는 거라면 그걸 ‘계속하고’ 싶다고 생각했다.</div>
-            <span class="source-info">「큐티클」 p.212</span>
-        </div>
-        <div class="writing-box">
-            <textarea placeholder="문장을 옮겨 적으며 머물러보세요..."></textarea>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="original-box">
-            <div class="original-text">“힘든 건 불행이 아니라…… 행복을 기다리는 게 지겨운 거였어.”</div>
-            <span class="source-info">「호텔 니약 따」 p.277</span>
-        </div>
-        <div class="writing-box">
-            <textarea placeholder="문장을 옮겨 적으며 머물러보세요..."></textarea>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="original-box">
-            <div class="original-text">이십대에는 내가 뭘 하든 그게 다 과정인 것 같았는데, 이제는 모든 게 결과일 따름인 듯해 초조하네요. 저 혼자만 이도 저도 아닌 채, 아무것도 아닌 것이 되어가고 있는 건 아닐까 불안해져요.</div>
-            <span class="source-info">「서른」 p.293</span>
-        </div>
-        <div class="writing-box">
-            <textarea placeholder="문장을 옮겨 적으며 머물러보세요..."></textarea>
-        </div>
-    </div>
-
-    <div class="row">
-        <div class="original-box">
-            <div class="original-text">무언가 나를 지나갔는데 그게 뭔지 몰라서 이름을 짓는다. 여러 개의 문장을 길게 이어서 누구도 한 번에 부를 수 없는 이름을. 기어코 다 부르고 난 뒤에도 여전히 알 수 없어 한 번 더 불러보게 만드는 그런 이름을.</div>
-            <span class="source-info">「작가의 말」 중에서</span>
-        </div>
-        <div class="writing-box">
-            <textarea placeholder="마지막 문장을 필사하며 마무리합니다..."></textarea>
+            <textarea id="content3" placeholder="문장을 천천히 옮겨 적어보세요..."></textarea>
+            <button class="save-btn" onclick="saveData(3)">이 문장 저장하기</button>
         </div>
     </div>
 
 </div>
 
-<footer style="text-align: center; color: #95a5a6; font-size: 0.9em; padding-bottom: 100px;">
+<footer style="text-align: center; color: #95a5a6; font-size: 0.9em; padding-bottom: 50px;">
     &copy; 김애란, 『비행운』 문장 필사 페이지
 </footer>
+
+<script>
+async function saveData(blockNumber) {
+    const userNameInput = document.getElementById('userName').value.trim();
+    
+    if (!userNameInput) {
+        alert("위쪽에 이름을 먼저 입력해주세요!");
+        document.getElementById('userName').focus();
+        return;
+    }
+
+    const contentInput = document.getElementById('content' + blockNumber).value.trim();
+    if (!contentInput) {
+        alert("필사 내용을 입력해주세요!");
+        return;
+    }
+
+    const sourceText = document.getElementById('source' + blockNumber).innerText;
+
+    // 적용된 선정이님의 웹 앱 URL
+    const gasUrl = "https://script.google.com/macros/s/AKfycbwS7EUJuOOlEbiuU1AYKvgOFq-aJJohyEyl2uwEM2DfDeExVtW1IFlUHReVG8laM69GBQ/exec"; 
+    
+    try {
+        const response = await fetch(gasUrl, {
+            method: "POST",
+            mode: "no-cors", // 중요: GAS 통신 시 보안 정책 대응
+            body: JSON.stringify({
+                name: userNameInput,
+                source: sourceText,
+                content: contentInput
+            })
+        });
+        
+        alert("✨ " + userNameInput + "님의 필사가 드라이브에 저장 요청되었습니다!\n(파일 생성까지 수 초가 걸릴 수 있습니다.)");
+        
+    } catch (error) {
+        alert("오류가 발생했습니다: " + error.message);
+    }
+}
+</script>
 
 </body>
 </html>
