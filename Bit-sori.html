@@ -26,26 +26,40 @@
         h1 { font-size: 2.2em; letter-spacing: 2px; margin-bottom: 10px; color: var(--accent-color); }
         .subtitle { color: #7f8c8d; font-size: 1em; }
 
+        /* 이름 입력 및 불러오기 버튼 영역 */
         .user-info-section {
             text-align: center;
             background: white;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 400px;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 500px;
             margin: 0 auto 50px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             border: 1px solid var(--border-color);
         }
         .user-info-section input {
-            padding: 10px;
+            padding: 12px;
             font-size: 1.1em;
             width: 80%;
-            border: 1px solid var(--accent-color);
-            border-radius: 4px;
+            border: 2px solid var(--accent-color);
+            border-radius: 6px;
             text-align: center;
             outline: none;
             font-family: inherit;
+            margin-bottom: 15px;
         }
+        .btn-group { display: flex; justify-content: center; gap: 10px; }
+        .btn-load {
+            background-color: white;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 8px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        .btn-load:hover { background-color: #f0f4ff; }
 
         .transcription-section {
             max-width: 1000px;
@@ -92,7 +106,7 @@
         textarea {
             width: 100%;
             height: 100%;
-            min-height: 150px;
+            min-height: 180px;
             background: #faf9f6;
             border: 1px solid var(--border-color);
             border-radius: 8px;
@@ -114,7 +128,7 @@
 
         .save-btn {
             margin-top: 15px;
-            padding: 10px 20px;
+            padding: 10px 25px;
             background-color: var(--accent-color);
             color: white;
             border: none;
@@ -142,8 +156,11 @@
 </header>
 
 <div class="user-info-section">
-    <label for="userName" style="display: block; margin-bottom: 10px; font-weight: bold;">필사 노트의 주인을 알려주세요</label>
-    <input type="text" id="userName" placeholder="예: 김선정" required>
+    <label for="userName" style="display: block; margin-bottom: 15px; font-weight: bold;">필사 노트의 주인을 알려주세요</label>
+    <input type="text" id="userName" placeholder="성함을 입력하세요 (예: 김선정)" required>
+    <div class="btn-group">
+        <button class="btn-load" onclick="loadHistory()">내 이전 기록 불러오기</button>
+    </div>
 </div>
 
 <div class="transcription-section">
@@ -188,11 +205,42 @@
 </footer>
 
 <script>
+const gasUrl = "https://script.google.com/macros/s/AKfycbwS7EUJuOOlEbiuU1AYKvgOFq-aJJohyEyl2uwEM2DfDeExVtW1IFlUHReVG8laM69GBQ/exec";
+
+// --- 데이터 불러오기 함수 ---
+async function loadHistory() {
+    const name = document.getElementById('userName').value.trim();
+    if (!name) {
+        alert("성함을 입력하셔야 이전 기록을 찾을 수 있습니다.");
+        document.getElementById('userName').focus();
+        return;
+    }
+
+    try {
+        alert(name + "님의 기록을 드라이브에서 가져오는 중입니다...");
+        
+        // GET 방식으로 이름 전달
+        const response = await fetch(`${gasUrl}?name=${encodeURIComponent(name)}`);
+        const text = await response.text();
+
+        if (text === "이력이 없습니다.") {
+            alert(name + "님으로 저장된 이전 기록이 없습니다.");
+        } else {
+            // 불러온 내용을 첫 번째 칸에 표시 (전체 이력을 보여줌)
+            document.getElementById('content1').value = text;
+            alert("이전 기록을 성공적으로 불러왔습니다!\n첫 번째 필사창에서 확인하실 수 있습니다.");
+        }
+    } catch (error) {
+        alert("불러오기 중 오류가 발생했습니다: " + error.message);
+    }
+}
+
+// --- 데이터 저장 함수 ---
 async function saveData(blockNumber) {
     const userNameInput = document.getElementById('userName').value.trim();
     
     if (!userNameInput) {
-        alert("위쪽에 이름을 먼저 입력해주세요!");
+        alert("위쪽에 성함을 먼저 입력해주세요!");
         document.getElementById('userName').focus();
         return;
     }
@@ -204,14 +252,13 @@ async function saveData(blockNumber) {
     }
 
     const sourceText = document.getElementById('source' + blockNumber).innerText;
-
-    // 적용된 선정이님의 웹 앱 URL
-    const gasUrl = "https://script.google.com/macros/s/AKfycbwS7EUJuOOlEbiuU1AYKvgOFq-aJJohyEyl2uwEM2DfDeExVtW1IFlUHReVG8laM69GBQ/exec"; 
     
     try {
-        const response = await fetch(gasUrl, {
+        alert("드라이브에 저장 요청을 보냈습니다.");
+        
+        await fetch(gasUrl, {
             method: "POST",
-            mode: "no-cors", // 중요: GAS 통신 시 보안 정책 대응
+            mode: "no-cors",
             body: JSON.stringify({
                 name: userNameInput,
                 source: sourceText,
@@ -219,10 +266,10 @@ async function saveData(blockNumber) {
             })
         });
         
-        alert("✨ " + userNameInput + "님의 필사가 드라이브에 저장 요청되었습니다!\n(파일 생성까지 수 초가 걸릴 수 있습니다.)");
+        alert("✨ " + userNameInput + "님의 필사가 저장되었습니다!\n(드라이브에 파일이 생성되기까지 수 초가 걸릴 수 있습니다.)");
         
     } catch (error) {
-        alert("오류가 발생했습니다: " + error.message);
+        alert("저장 중 오류가 발생했습니다: " + error.message);
     }
 }
 </script>
