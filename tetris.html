@@ -2,19 +2,81 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Simple Tetris</title>
+    <title>Tetris with Controls Guide</title>
     <style>
-        body { background: #202028; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        #game-container { position: relative; border: 2px solid #fff; }
-        canvas { display: block; background-color: #000; }
-        #score { font-size: 24px; margin-bottom: 10px; }
+        body { 
+            background: #202028; 
+            color: #fff; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        #game-wrapper {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        #game-container { 
+            position: relative; 
+            border: 4px solid #fff; 
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        canvas { 
+            display: block; 
+            background-color: #000; 
+        }
+        .info-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        #score { 
+            font-size: 32px; 
+            font-weight: bold;
+            color: #FFE138;
+        }
+        .controls-guide {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #555;
+        }
+        .controls-guide h3 { margin-top: 0; color: #0DC2FF; }
+        .controls-guide ul { list-style: none; padding: 0; margin: 0; }
+        .controls-guide li { margin-bottom: 8px; font-size: 14px; }
+        .key { 
+            background: #444; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            border: 1px solid #888;
+            font-family: monospace;
+        }
     </style>
 </head>
 <body>
 
     <div id="score">Score: 0</div>
-    <div id="game-container">
-        <canvas id="tetris" width="240" height="400"></canvas>
+
+    <div id="game-wrapper">
+        <div id="game-container">
+            <canvas id="tetris" width="240" height="400"></canvas>
+        </div>
+
+        <div class="info-panel">
+            <div class="controls-guide">
+                <h3>조작 방법</h3>
+                <ul>
+                    <li><span class="key">←</span> <span class="key">→</span> : 좌우 이동</li>
+                    <li><span class="key">↓</span> : 빠르게 내리기</li>
+                    <li><span class="key">W</span> : 시계 방향 회전</li>
+                    <li><span class="key">Q</span> : 반시계 방향 회전</li>
+                </ul>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -24,7 +86,6 @@
 
         context.scale(20, 20);
 
-        // 1. 블록 모양 정의
         function createPiece(type) {
             if (type === 'I') return [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]];
             else if (type === 'L') return [[0, 2, 0], [0, 2, 0], [0, 2, 2]];
@@ -35,7 +96,6 @@
             else if (type === 'T') return [[0, 7, 0], [7, 7, 7], [0, 0, 0]];
         }
 
-        // 2. 그리기 함수
         function draw() {
             context.fillStyle = '#000';
             context.fillRect(0, 0, canvas.width, canvas.height);
@@ -50,12 +110,15 @@
                         const colors = [null, '#FF0D72', '#0DC2FF', '#0DFF72', '#F538FF', '#FF8E0D', '#FFE138', '#3877FF'];
                         context.fillStyle = colors[value];
                         context.fillRect(x + offset.x, y + offset.y, 1, 1);
+                        // 블록 테두리 효과
+                        context.lineWidth = 0.05;
+                        context.strokeStyle = 'white';
+                        context.strokeRect(x + offset.x, y + offset.y, 1, 1);
                     }
                 });
             });
         }
 
-        // 3. 충돌 감지 로직
         function collide(arena, player) {
             const [m, o] = [player.matrix, player.pos];
             for (let y = 0; y < m.length; ++y) {
@@ -68,7 +131,6 @@
             return false;
         }
 
-        // 4. 보드 데이터(아레나) 생성 및 라인 제거
         function createMatrix(w, h) {
             const matrix = [];
             while (h--) matrix.push(new Array(w).fill(0));
@@ -90,7 +152,6 @@
             updateScore();
         }
 
-        // 5. 플레이어 동작
         function playerDrop() {
             player.pos.y++;
             if (collide(arena, player)) {
@@ -159,7 +220,6 @@
         const arena = createMatrix(12, 20);
         const player = { pos: {x: 0, y: 0}, matrix: null, score: 0 };
 
-        // 6. 게임 루프
         let dropCounter = 0;
         let dropInterval = 1000;
         let lastTime = 0;
@@ -173,13 +233,12 @@
             requestAnimationFrame(update);
         }
 
-        // 7. 컨트롤
         document.addEventListener('keydown', event => {
-            if (event.keyCode === 37) playerMove(-1);      // 왼쪽 화살표
-            else if (event.keyCode === 39) playerMove(1);  // 오른쪽 화살표
-            else if (event.keyCode === 40) playerDrop();   // 아래 화살표
-            else if (event.keyCode === 81) playerRotate(-1); // Q키 (회전)
-            else if (event.keyCode === 87) playerRotate(1);  // W키 (회전)
+            if (event.keyCode === 37) playerMove(-1);
+            else if (event.keyCode === 39) playerMove(1);
+            else if (event.keyCode === 40) playerDrop();
+            else if (event.keyCode === 81) playerRotate(-1); // Q
+            else if (event.keyCode === 87) playerRotate(1);  // W
         });
 
         playerReset();
