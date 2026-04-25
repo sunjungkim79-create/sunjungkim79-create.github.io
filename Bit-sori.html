@@ -207,7 +207,7 @@
 <script>
 const gasUrl = "https://script.google.com/macros/s/AKfycbwS7EUJuOOlEbiuU1AYKvgOFq-aJJohyEyl2uwEM2DfDeExVtW1IFlUHReVG8laM69GBQ/exec";
 
-// --- 데이터 불러오기 함수 ---
+// --- 데이터 불러오기 함수 (CORS 해결 버전) ---
 async function loadHistory() {
     const name = document.getElementById('userName').value.trim();
     if (!name) {
@@ -219,19 +219,34 @@ async function loadHistory() {
     try {
         alert(name + "님의 기록을 드라이브에서 가져오는 중입니다...");
         
-        // GET 방식으로 이름 전달
-        const response = await fetch(`${gasUrl}?name=${encodeURIComponent(name)}`);
+        const finalUrl = `${gasUrl}?name=${encodeURIComponent(name)}`;
+        
+        // CORS 문제를 피하기 위한 옵션 수정
+        const response = await fetch(finalUrl, {
+            method: "GET",
+            // redirect 옵션을 'follow'로 설정하여 구글의 리다이렉션을 따라가도록 함
+            redirect: "follow", 
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8",
+            }
+        });
+
+        // 응답 상태가 ok가 아니면 에러 발생
+        if (!response.ok) {
+             throw new Error(`HTTP 오류 상태: ${response.status}`);
+        }
+
         const text = await response.text();
 
         if (text === "이력이 없습니다.") {
             alert(name + "님으로 저장된 이전 기록이 없습니다.");
         } else {
-            // 불러온 내용을 첫 번째 칸에 표시 (전체 이력을 보여줌)
             document.getElementById('content1').value = text;
             alert("이전 기록을 성공적으로 불러왔습니다!\n첫 번째 필사창에서 확인하실 수 있습니다.");
         }
     } catch (error) {
-        alert("불러오기 중 오류가 발생했습니다: " + error.message);
+        console.error("Fetch 에러 상세:", error); // 콘솔에 상세 에러 로깅
+        alert("기록을 불러오지 못했습니다. \n사유: 브라우저 보안 정책(CORS) 또는 서버 오류입니다.");
     }
 }
 
