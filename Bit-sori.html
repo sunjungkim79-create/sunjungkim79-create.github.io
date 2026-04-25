@@ -138,4 +138,157 @@
             align-self: flex-end;
             transition: background 0.2s;
         }
-        .
+        .save-btn:hover { background-color: #3b5598; }
+
+        @media (max-width: 768px) {
+            .row { flex-direction: column; gap: 20px; }
+            .original-box { border-right: none; border-bottom: 1px dashed var(--border-color); padding-right: 0; padding-bottom: 20px; }
+            .writing-box { padding-left: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>빗소리와 함께하는 필사</h1>
+    <div class="subtitle">마음을 울린 문장들을 기록으로 남겨보세요.</div>
+</header>
+
+<div class="user-info-section">
+    <label for="userName" style="display: block; margin-bottom: 15px; font-weight: bold;">필사 노트의 주인을 알려주세요</label>
+    <input type="text" id="userName" placeholder="성함을 입력하세요 (예: 김선정)" required>
+    <div class="btn-group">
+        <button class="btn-load" onclick="loadHistory()">내 이전 기록 불러오기</button>
+    </div>
+</div>
+
+<div class="transcription-section">
+
+    <div class="row">
+        <div class="original-box">
+            <div class="original-text" id="source1">아무도 내가 죽어가고 있다는 걸 모른다는 고립감. 그리고 그걸 누구에게도 전하지 못한다는 갑갑함이 밀려왔다. 수면 위로 아른아른 조용하게 빛나는 여름 햇빛이 보였다...</div>
+            <span class="source-info">「너의 여름은 어떠니」 p.41</span>
+        </div>
+        <div class="writing-box">
+            <textarea id="content1" placeholder="문장을 천천히 옮겨 적어보세요..."></textarea>
+            <button class="save-btn" onclick="saveData(1)">이 문장 저장하기</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="original-box">
+            <div class="original-text" id="source2">A구역은 세상만사를 삼킨 심연처럼 시커먼 아가리를 벌린 채 시치미를 떼고 있었다. 그곳은 한없이 깊고 어두워 보였다. 방 안으로 검은 나방 한 마리가 후드득 들어왔다.</div>
+            <span class="source-info">「벌레들」 p.75</span>
+        </div>
+        <div class="writing-box">
+            <textarea id="content2" placeholder="문장을 천천히 옮겨 적어보세요..."></textarea>
+            <button class="save-btn" onclick="saveData(2)">이 문장 저장하기</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="original-box">
+            <div class="original-text" id="source3">“힘든 건 불행이 아니라…… 행복을 기다리는 게 지겨운 거였어.”</div>
+            <span class="source-info">「호텔 니약 따」 pp.276~277</span>
+        </div>
+        <div class="writing-box">
+            <textarea id="content3" placeholder="문장을 천천히 옮겨 적어보세요..."></textarea>
+            <button class="save-btn" onclick="saveData(3)">이 문장 저장하기</button>
+        </div>
+    </div>
+
+</div>
+
+<footer style="text-align: center; color: #95a5a6; font-size: 0.9em; padding-bottom: 50px;">
+    &copy; 김애란, 『비행운』 문장 필사 페이지
+</footer>
+
+<script>
+// 새로 발급받은 URL 적용 완료!
+const gasUrl = "https://script.google.com/macros/s/AKfycbwKLL-4Qbhu6IwK-jHb9zwgo1awHWtUnu1K7FKPe2_-Q9qneZsrPtzIpynbMEUhntTyqA/exec";
+
+// --- 데이터 불러오기 함수 (JSONP 우회 방식) ---
+function loadHistory() {
+    const name = document.getElementById('userName').value.trim();
+    if (!name) {
+        alert("성함을 입력하셔야 이전 기록을 찾을 수 있습니다.");
+        document.getElementById('userName').focus();
+        return;
+    }
+
+    alert(name + "님의 기록을 가져오는 중입니다...");
+    
+    // JSONP 처리를 위한 고유 콜백 함수 이름 생성
+    const callbackName = 'jsonpCallback_' + Math.round(100000 * Math.random());
+    
+    // 콜백 함수 정의: 구글 서버에서 응답이 오면 이 함수가 실행됩니다.
+    window[callbackName] = function(data) {
+        if (data.text === "이력이 없습니다.") {
+            alert(name + "님으로 저장된 이전 기록이 없습니다.");
+        } else {
+            document.getElementById('content1').value = data.text;
+            alert("이전 기록을 성공적으로 불러왔습니다!");
+        }
+        // 처리 후 스크립트 찌꺼기 청소
+        delete window[callbackName];
+        const script = document.getElementById(callbackName);
+        if (script) script.remove();
+    };
+
+    // 스크립트 태그를 만들어 구글 서버에 요청 (CORS 무시됨)
+    const script = document.createElement('script');
+    script.id = callbackName;
+    // url에 callback 파라미터 추가
+    script.src = `${gasUrl}?name=${encodeURIComponent(name)}&callback=${callbackName}`;
+    
+    // 에러 처리 (네트워크 단절 등)
+    script.onerror = function() {
+        alert("기록을 불러오지 못했습니다. 네트워크 상태를 확인해주세요.");
+        delete window[callbackName];
+        script.remove();
+    };
+
+    document.body.appendChild(script);
+}
+
+// --- 데이터 저장 함수 ---
+async function saveData(blockNumber) {
+    const userNameInput = document.getElementById('userName').value.trim();
+    
+    if (!userNameInput) {
+        alert("위쪽에 성함을 먼저 입력해주세요!");
+        document.getElementById('userName').focus();
+        return;
+    }
+
+    const contentInput = document.getElementById('content' + blockNumber).value.trim();
+    if (!contentInput) {
+        alert("필사 내용을 입력해주세요!");
+        return;
+    }
+
+    const sourceText = document.getElementById('source' + blockNumber).innerText;
+    
+    try {
+        alert("드라이브에 저장 요청을 보냈습니다.");
+        
+        await fetch(gasUrl, {
+            method: "POST",
+            mode: "no-cors",
+            body: JSON.stringify({
+                name: userNameInput,
+                source: sourceText,
+                content: contentInput
+            })
+        });
+        
+        alert("✨ " + userNameInput + "님의 필사가 저장되었습니다!\n(드라이브에 파일이 생성되기까지 수 초가 걸릴 수 있습니다.)");
+        
+    } catch (error) {
+        alert("저장 중 오류가 발생했습니다: " + error.message);
+    }
+}
+</script>
+
+</body>
+</html>
