@@ -2,12 +2,12 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Tetris with Controls Guide</title>
+    <title>Tetris - Next Piece Preview</title>
     <style>
         body { 
             background: #202028; 
             color: #fff; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            font-family: 'Segoe UI', sans-serif; 
             display: flex; 
             flex-direction: column; 
             align-items: center; 
@@ -17,49 +17,34 @@
         }
         #game-wrapper {
             display: flex;
-            gap: 20px;
+            gap: 30px;
             align-items: flex-start;
         }
         #game-container { 
-            position: relative; 
             border: 4px solid #fff; 
             box-shadow: 0 0 20px rgba(0,0,0,0.5);
         }
-        canvas { 
-            display: block; 
-            background-color: #000; 
-        }
+        canvas { background-color: #000; display: block; }
         .info-panel {
             display: flex;
             flex-direction: column;
             gap: 20px;
+            width: 150px;
         }
-        #score { 
-            font-size: 32px; 
-            font-weight: bold;
-            color: #FFE138;
-        }
-        .controls-guide {
+        .side-box {
             background: rgba(255, 255, 255, 0.1);
             padding: 15px;
             border-radius: 8px;
             border: 1px solid #555;
+            text-align: center;
         }
-        .controls-guide h3 { margin-top: 0; color: #0DC2FF; }
-        .controls-guide ul { list-style: none; padding: 0; margin: 0; }
-        .controls-guide li { margin-bottom: 8px; font-size: 14px; }
-        .key { 
-            background: #444; 
-            padding: 2px 6px; 
-            border-radius: 4px; 
-            border: 1px solid #888;
-            font-family: monospace;
-        }
+        h3 { margin: 0 0 10px 0; font-size: 18px; color: #0DC2FF; }
+        #score { font-size: 24px; font-weight: bold; color: #FFE138; }
+        .controls-guide { text-align: left; font-size: 13px; }
+        .key { background: #444; padding: 1px 5px; border-radius: 4px; font-family: monospace; }
     </style>
 </head>
 <body>
-
-    <div id="score">Score: 0</div>
 
     <div id="game-wrapper">
         <div id="game-container">
@@ -67,14 +52,22 @@
         </div>
 
         <div class="info-panel">
-            <div class="controls-guide">
-                <h3>조작 방법</h3>
-                <ul>
-                    <li><span class="key">←</span> <span class="key">→</span> : 좌우 이동</li>
-                    <li><span class="key">↓</span> : 빠르게 내리기</li>
-                    <li><span class="key">W</span> : 시계 방향 회전</li>
-                    <li><span class="key">Q</span> : 반시계 방향 회전</li>
-                </ul>
+            <div class="side-box">
+                <h3>Score</h3>
+                <div id="score">0</div>
+            </div>
+
+            <div class="side-box">
+                <h3>Next</h3>
+                <canvas id="next" width="80" height="80"></canvas>
+            </div>
+
+            <div class="side-box controls-guide">
+                <h3>Controls</h3>
+                <div><span class="key">←</span><span class="key">→</span> 이동</div>
+                <div><span class="key">↓</span> 빠른 하강</div>
+                <div><span class="key">W</span> 회전 (CW)</div>
+                <div><span class="key">Q</span> 회전 (CCW)</div>
             </div>
         </div>
     </div>
@@ -82,9 +75,14 @@
     <script>
         const canvas = document.getElementById('tetris');
         const context = canvas.getContext('2d');
+        const nextCanvas = document.getElementById('next');
+        const nextContext = nextCanvas.getContext('2d');
         const scoreElement = document.getElementById('score');
 
         context.scale(20, 20);
+        nextContext.scale(20, 20); // 미리보기 캔버스도 동일 비율로 스케일링
+
+        const colors = [null, '#FF0D72', '#0DC2FF', '#0DFF72', '#F538FF', '#FF8E0D', '#FFE138', '#3877FF'];
 
         function createPiece(type) {
             if (type === 'I') return [[0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0], [0, 1, 0, 0]];
@@ -96,36 +94,41 @@
             else if (type === 'T') return [[0, 7, 0], [7, 7, 7], [0, 0, 0]];
         }
 
-        function draw() {
-            context.fillStyle = '#000';
-            context.fillRect(0, 0, canvas.width, canvas.height);
-            drawMatrix(arena, {x: 0, y: 0});
-            drawMatrix(player.matrix, player.pos);
-        }
-
-        function drawMatrix(matrix, offset) {
+        // 행렬 그리기 (메인/미리보기 공용)
+        function drawMatrix(matrix, offset, ctx) {
             matrix.forEach((row, y) => {
                 row.forEach((value, x) => {
                     if (value !== 0) {
-                        const colors = [null, '#FF0D72', '#0DC2FF', '#0DFF72', '#F538FF', '#FF8E0D', '#FFE138', '#3877FF'];
-                        context.fillStyle = colors[value];
-                        context.fillRect(x + offset.x, y + offset.y, 1, 1);
-                        // 블록 테두리 효과
-                        context.lineWidth = 0.05;
-                        context.strokeStyle = 'white';
-                        context.strokeRect(x + offset.x, y + offset.y, 1, 1);
+                        ctx.fillStyle = colors[value];
+                        ctx.fillRect(x + offset.x, y + offset.y, 1, 1);
+                        ctx.lineWidth = 0.05;
+                        ctx.strokeStyle = 'white';
+                        ctx.strokeRect(x + offset.x, y + offset.y, 1, 1);
                     }
                 });
             });
         }
 
+        function draw() {
+            // 메인 화면 그리기
+            context.fillStyle = '#000';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            drawMatrix(arena, {x: 0, y: 0}, context);
+            drawMatrix(player.matrix, player.pos, context);
+
+            // 미리보기 화면 그리기
+            nextContext.fillStyle = '#000';
+            nextContext.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+            // 미리보기 블록은 중앙에 오도록 오프셋 조절
+            drawMatrix(player.next, {x: 1, y: 1}, nextContext);
+        }
+
+        // 로직 함수들 (merge, collide, rotate 등은 이전과 동일)
         function collide(arena, player) {
             const [m, o] = [player.matrix, player.pos];
             for (let y = 0; y < m.length; ++y) {
                 for (let x = 0; x < m[y].length; ++x) {
-                    if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) {
-                        return true;
-                    }
+                    if (m[y][x] !== 0 && (arena[y + o.y] && arena[y + o.y][x + o.x]) !== 0) return true;
                 }
             }
             return false;
@@ -135,6 +138,22 @@
             const matrix = [];
             while (h--) matrix.push(new Array(w).fill(0));
             return matrix;
+        }
+
+        function merge(arena, player) {
+            player.matrix.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value !== 0) arena[y + player.pos.y][x + player.pos.x] = value;
+                });
+            });
+        }
+
+        function rotate(matrix, dir) {
+            for (let y = 0; y < matrix.length; ++y) {
+                for (let x = 0; x < y; ++x) [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
+            }
+            if (dir > 0) matrix.forEach(row => row.reverse());
+            else matrix.reverse();
         }
 
         function arenaSweep() {
@@ -149,7 +168,7 @@
                 player.score += rowCount * 10;
                 rowCount *= 2;
             }
-            updateScore();
+            scoreElement.innerText = player.score;
         }
 
         function playerDrop() {
@@ -183,42 +202,29 @@
             }
         }
 
-        function rotate(matrix, dir) {
-            for (let y = 0; y < matrix.length; ++y) {
-                for (let x = 0; x < y; ++x) {
-                    [matrix[x][y], matrix[y][x]] = [matrix[y][x], matrix[x][y]];
-                }
-            }
-            if (dir > 0) matrix.forEach(row => row.reverse());
-            else matrix.reverse();
-        }
-
-        function merge(arena, player) {
-            player.matrix.forEach((row, y) => {
-                row.forEach((value, x) => {
-                    if (value !== 0) arena[y + player.pos.y][x + player.pos.x] = value;
-                });
-            });
-        }
-
+        // 블록 리셋 로직 수정
         function playerReset() {
             const pieces = 'ILJOTSZ';
-            player.matrix = createPiece(pieces[pieces.length * Math.random() | 0]);
+            if (player.next === null) {
+                player.next = createPiece(pieces[pieces.length * Math.random() | 0]);
+            }
+            
+            // 다음 블록을 현재 블록으로 가져오고 새로운 다음 블록 생성
+            player.matrix = player.next;
+            player.next = createPiece(pieces[pieces.length * Math.random() | 0]);
+            
             player.pos.y = 0;
             player.pos.x = (arena[0].length / 2 | 0) - (player.matrix[0].length / 2 | 0);
+            
             if (collide(arena, player)) {
                 arena.forEach(row => row.fill(0));
                 player.score = 0;
-                updateScore();
+                scoreElement.innerText = 0;
             }
         }
 
-        function updateScore() {
-            scoreElement.innerText = `Score: ${player.score}`;
-        }
-
         const arena = createMatrix(12, 20);
-        const player = { pos: {x: 0, y: 0}, matrix: null, score: 0 };
+        const player = { pos: {x: 0, y: 0}, matrix: null, next: null, score: 0 };
 
         let dropCounter = 0;
         let dropInterval = 1000;
@@ -237,12 +243,11 @@
             if (event.keyCode === 37) playerMove(-1);
             else if (event.keyCode === 39) playerMove(1);
             else if (event.keyCode === 40) playerDrop();
-            else if (event.keyCode === 81) playerRotate(-1); // Q
-            else if (event.keyCode === 87) playerRotate(1);  // W
+            else if (event.keyCode === 81) playerRotate(-1);
+            else if (event.keyCode === 87) playerRotate(1);
         });
 
         playerReset();
-        updateScore();
         update();
     </script>
 </body>
